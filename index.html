@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Myo Reps Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            gap: 16px;
+        }
+
+        /* === CONFIGURATION PANEL === */
+        .config-panel {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: stretch;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .config-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .config-group label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .config-group input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .config-group input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .config-group input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* === MAIN CONTAINER === */
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 32px;
+            min-height: 0;
+        }
+
+        /* === SERIES COUNTER SECTION === */
+        .counter-section {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .counter-label {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .counter-display {
+            font-size: 72px;
+            font-weight: 700;
+            color: #4ade80;
+            line-height: 1;
+            text-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);
+            min-width: 120px;
+        }
+
+        .sub-counter {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+        }
+
+        /* === STATE DISPLAY === */
+        .state-box {
+            background: rgba(59, 130, 246, 0.1);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 16px 24px;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            width: 100%;
+            max-width: 280px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .state-box.activation {
+            background: rgba(249, 115, 22, 0.1);
+            border-color: rgba(249, 115, 22, 0.3);
+            color: #fb923c;
+        }
+
+        .state-box.rest {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .state-box.mini-series {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+        }
+
+        /* === TIMER DISPLAY === */
+        .timer-display {
+            font-size: 56px;
+            font-weight: 700;
+            color: #ef4444;
+            text-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+            line-height: 1;
+            animation: pulse-timer 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse-timer {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* === BUTTONS === */
+        .button-group {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            max-width: 280px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 14px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.primary {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            font-size: 18px;
+            padding: 16px 32px;
+            flex-basis: 100%;
+        }
+
+        button.primary:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+
+        button.success {
+            background: #22c55e;
+            border-color: #22c55e;
+            color: #000;
+        }
+
+        button.success:hover {
+            background: #16a34a;
+            border-color: #16a34a;
+        }
+
+        button.danger {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.5);
+            color: #fca5a5;
+            font-size: 12px;
+        }
+
+        button.danger:hover {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: rgba(239, 68, 68, 0.7);
+        }
+
+        /* === HIDDEN STATES === */
+        .hidden {
+            display: none !important;
+        }
+
+        /* === FOOTER === */
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        button.reset {
+            width: 100%;
+        }
+
+        /* === LANGUAGE SELECTOR === */
+        .language-selector {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 6px 12px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .language-selector:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Configuration Panel -->
+    <div class="config-panel">
+        <div class="config-group">
+            <label for="restTime">Descanso (seg)</label>
+            <input type="text" id="restTime" value="15">
+        </div>
+        <button class="danger reset" onclick="resetSession()">Reiniciar</button>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Series Counter -->
+        <div class="counter-section">
+            <div class="counter-label">Mini-series</div>
+            <div class="counter-display" id="counterDisplay">0</div>
+        </div>
+
+        <!-- State Box -->
+        <div class="state-box activation" id="stateBox">
+            Serie de activación
+        </div>
+
+        <!-- Timer Display (Hidden initially) -->
+        <div class="timer-display hidden" id="timerDisplay">15</div>
+
+        <!-- Button Group -->
+        <div class="button-group" id="buttonGroup">
+            <button class="primary" onclick="startRest()">Comenzar Descanso</button>
+        </div>
+    </div>
+
+    <!-- Language Selector -->
+    <select class="language-selector" id="languageSelector" onchange="changeLanguage(this.value)">
+        <option value="es">Español</option>
+        <option value="en">English</option>
+    </select>
+
+    <!-- Footer -->
+    <div class="footer">
+        Myo Reps Gym Tracker
+    </div>
+
+    <script>
+        // Translations
+        const translations = {
+            es: {
+                restLabel: 'Descanso (seg)',
+                resetButton: 'Reiniciar',
+                miniSeriesLabel: 'Mini-series',
+                activationPhase: 'Serie de activación',
+                restingPhase: 'DESCANSANDO',
+                miniSeriesPhase: 'Completando mini-series',
+                startRestButton: 'Comenzar Descanso',
+                pauseButton: 'Pausar',
+                resumeButton: 'Reanudar',
+                cancelButton: 'Cancelar',
+                nextRestButton: 'Siguiente Descanso',
+                resetConfirm: '¿Reiniciar la sesión? Se perderán todos los datos.',
+                footerText: 'Myo Reps Gym Tracker'
+            },
+            en: {
+                restLabel: 'Rest (sec)',
+                resetButton: 'Reset',
+                miniSeriesLabel: 'Mini-series',
+                activationPhase: 'Activation Set',
+                restingPhase: 'RESTING',
+                miniSeriesPhase: 'Performing Mini-series',
+                startRestButton: 'Start Rest',
+                pauseButton: 'Pause',
+                resumeButton: 'Resume',
+                cancelButton: 'Cancel',
+                nextRestButton: 'Next Rest',
+                resetConfirm: 'Reset session? All data will be lost.',
+                footerText: 'Myo Reps Gym Tracker'
+            }
+        };
+
+        // State management
+        let state = 'activation'; // activation, rest, mini-series
+        let miniSeriesCount = 0;
+        let restTimeRemaining = 0;
+        let timerInterval = null;
+        let totalRestTime = 15;
+        let currentLanguage = 'en';
+
+        // DOM Elements
+        const counterDisplay = document.getElementById('counterDisplay');
+        const stateBox = document.getElementById('stateBox');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const buttonGroup = document.getElementById('buttonGroup');
+        const restTimeInput = document.getElementById('restTime');
+        const languageSelector = document.getElementById('languageSelector');
+
+        // Load from localStorage
+        function loadSession() {
+            const saved = localStorage.getItem('myoRepsSession');
+            const savedLanguage = localStorage.getItem('myoRepsLanguage') || 'en';
+            currentLanguage = savedLanguage;
+            languageSelector.value = currentLanguage;
+            
+            if (saved) {
+                const data = JSON.parse(saved);
+                restTimeInput.value = data.restTime || 15;
+            }
+            updateUI();
+        }
+
+        // Save to localStorage
+        function saveSession() {
+            localStorage.setItem('myoRepsSession', JSON.stringify({
+                restTime: restTimeInput.value
+            }));
+        }
+
+        // Get translated text
+        function t(key) {
+            return translations[currentLanguage][key] || translations['es'][key];
+        }
+
+        // Change language
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('myoRepsLanguage', lang);
+            updateUI();
+        }
+
+        // Update UI with current language
+        function updateUI() {
+            document.querySelector('.config-group label').textContent = t('restLabel');
+            document.querySelector('.danger.reset').textContent = t('resetButton');
+            document.querySelector('.counter-label').textContent = t('miniSeriesLabel');
+            document.querySelector('.footer').textContent = t('footerText');
+            
+            // Update buttons based on current state
+            if (state === 'activation') {
+                buttonGroup.innerHTML = `<button class="primary" onclick="startRest()">${t('startRestButton')}</button>`;
+                stateBox.textContent = t('activationPhase');
+            } else if (state === 'rest') {
+                stateBox.textContent = t('restingPhase');
+                buttonGroup.innerHTML = `<button class="danger" onclick="pauseRest()">${t('pauseButton')}</button>`;
+            } else if (state === 'mini-series') {
+                stateBox.textContent = t('miniSeriesPhase');
+                buttonGroup.innerHTML = `<button class="primary" onclick="nextRest()">${t('nextRestButton')}</button>`;
+            }
+        }
+
+        // Update display
+        function updateDisplay() {
+            counterDisplay.textContent = miniSeriesCount;
+            saveSession();
+        }
+
+        // Start rest period
+        function startRest() {
+            totalRestTime = parseInt(restTimeInput.value) || 15;
+            state = 'rest';
+            restTimeRemaining = totalRestTime;
+            
+            stateBox.className = 'state-box rest';
+            stateBox.textContent = t('restingPhase');
+            timerDisplay.classList.remove('hidden');
+            timerDisplay.textContent = restTimeRemaining;
+            
+            buttonGroup.innerHTML = `<button class="danger" onclick="pauseRest()">${t('pauseButton')}</button>`;
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                restTimeRemaining--;
+                timerDisplay.textContent = restTimeRemaining;
+                
+                if (restTimeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    startMiniSeries();
+                }
+            }, 1000);
+        }
+
+        // Pause rest
+        function pauseRest() {
+            clearInterval(timerInterval);
+            buttonGroup.innerHTML = `
+                <button class="primary" onclick="resumeRest()">${t('resumeButton')}</button>
+                <button class="danger" onclick="cancelRest()">${t('cancelButton')}</button>
+            `;
+        }
+
+        // Resume rest
+        function resumeRest() {
+            buttonGroup.innerHTML = `<button class="danger" onclick="pauseRest()">${t('pauseButton')}</button>`;
+            timerInterval = setInterval(() => {
+                restTimeRemaining--;
+                timerDisplay.textContent = restTimeRemaining;
+                
+                if (restTimeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    startMiniSeries();
+                }
+            }, 1000);
+        }
+
+        // Cancel rest
+        function cancelRest() {
+            clearInterval(timerInterval);
+            state = 'activation';
+            timerDisplay.classList.add('hidden');
+            stateBox.className = 'state-box activation';
+            stateBox.textContent = t('activationPhase');
+            buttonGroup.innerHTML = `<button class="primary" onclick="startRest()">${t('startRestButton')}</button>`;
+        }
+
+        // Start mini-series
+        function startMiniSeries() {
+            state = 'mini-series';
+            
+            stateBox.className = 'state-box mini-series';
+            stateBox.textContent = t('miniSeriesPhase');
+            timerDisplay.classList.add('hidden');
+            
+            buttonGroup.innerHTML = `
+                <button class="primary" onclick="nextRest()">${t('nextRestButton')}</button>
+            `;
+        }
+
+        // Next rest (completes mini-series, starts new rest)
+        function nextRest() {
+            miniSeriesCount++;
+            updateDisplay();
+            startRest();
+        }
+
+        // Reset session
+        function resetSession() {
+            if (confirm(t('resetConfirm'))) {
+                miniSeriesCount = 0;
+                state = 'activation';
+                clearInterval(timerInterval);
+                
+                timerDisplay.classList.add('hidden');
+                stateBox.className = 'state-box activation';
+                stateBox.textContent = t('activationPhase');
+                buttonGroup.innerHTML = `<button class="primary" onclick="startRest()">${t('startRestButton')}</button>`;
+                
+                updateDisplay();
+            }
+        }
+
+        // Initialize
+        loadSession();
+    </script>
+</body>
+</html>
