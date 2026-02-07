@@ -407,6 +407,7 @@
         let timerInterval = null;
         let totalRestTime = 15;
         let currentLanguage = 'en';
+        let audioContext = null;
 
         // DOM Elements
         const counterDisplay = document.getElementById('counterDisplay');
@@ -441,24 +442,44 @@
             return translations[currentLanguage][key] || translations['es'][key];
         }
 
+        // Initialize audio context (singleton pattern)
+        function initAudioContext() {
+            if (!audioContext) {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    return null;
+                }
+            }
+            
+            // Resume if suspended (browser autoplay policy)
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            return audioContext;
+        }
+
         // Play countdown beep (for seconds 3, 2, 1)
         function playCountdownBeep() {
             try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
+                const ctx = initAudioContext();
+                if (!ctx) return;
+                
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
                 
                 oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
+                gainNode.connect(ctx.destination);
                 
                 oscillator.frequency.value = 800; // Hz
                 oscillator.type = 'sine';
                 
-                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
                 
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.1);
+                oscillator.start(ctx.currentTime);
+                oscillator.stop(ctx.currentTime + 0.1);
             } catch (e) {
                 // Silent fail if audio context not available
             }
@@ -467,21 +488,23 @@
         // Play finish beep (for second 0)
         function playFinishBeep() {
             try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
+                const ctx = initAudioContext();
+                if (!ctx) return;
+                
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
                 
                 oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
+                gainNode.connect(ctx.destination);
                 
                 oscillator.frequency.value = 1200; // Hz (higher pitch)
                 oscillator.type = 'sine';
                 
-                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
                 
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.2);
+                oscillator.start(ctx.currentTime);
+                oscillator.stop(ctx.currentTime + 0.2);
             } catch (e) {
                 // Silent fail if audio context not available
             }
@@ -535,6 +558,9 @@
 
         // Start rest period
         function startRest() {
+            // Initialize audio context on first user interaction
+            initAudioContext();
+            
             totalRestTime = parseInt(restTimeInput.value) || 15;
             state = 'rest';
             restTimeRemaining = totalRestTime;
