@@ -393,6 +393,52 @@
             return translations[currentLanguage][key] || translations['es'][key];
         }
 
+        // Play countdown beep (for seconds 3, 2, 1)
+        function playCountdownBeep() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800; // Hz
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            } catch (e) {
+                // Silent fail if audio context not available
+            }
+        }
+
+        // Play finish beep (for second 0)
+        function playFinishBeep() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 1200; // Hz (higher pitch)
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+            } catch (e) {
+                // Silent fail if audio context not available
+            }
+        }
+
         // Change language
         function changeLanguage(lang) {
             currentLanguage = lang;
@@ -444,8 +490,14 @@
                 restTimeRemaining--;
                 timerDisplay.textContent = restTimeRemaining;
                 
+                // Play sound for countdown (3, 2, 1)
+                if (restTimeRemaining > 0 && restTimeRemaining <= 3) {
+                    playCountdownBeep();
+                }
+                
                 if (restTimeRemaining <= 0) {
                     clearInterval(timerInterval);
+                    playFinishBeep();
                     startMiniSeries();
                 }
             }, 1000);
@@ -467,8 +519,14 @@
                 restTimeRemaining--;
                 timerDisplay.textContent = restTimeRemaining;
                 
+                // Play sound for countdown (3, 2, 1)
+                if (restTimeRemaining > 0 && restTimeRemaining <= 3) {
+                    playCountdownBeep();
+                }
+                
                 if (restTimeRemaining <= 0) {
                     clearInterval(timerInterval);
+                    playFinishBeep();
                     startMiniSeries();
                 }
             }, 1000);
