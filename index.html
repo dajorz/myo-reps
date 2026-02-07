@@ -257,21 +257,52 @@
         }
 
         /* === LANGUAGE SELECTOR === */
-        .language-selector {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            padding: 6px 12px;
-            cursor: pointer;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 11px;
-            font-weight: 600;
-            transition: all 0.2s ease;
+        /* === LANGUAGE FLAGS === */
+        .language-flags {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: auto;
+            padding-top: 16px;
         }
 
-        .language-selector:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
+        .flag-button {
+            background: transparent;
+            border: none;
+            outline: none;
+            border-radius: 6px;
+            width: 36px;
+            height: 36px;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            opacity: 0.4;
+        }
+
+        .flag-button:hover {
+            opacity: 0.7;
+            transform: scale(1.1);
+        }
+
+        .flag-button:focus {
+            outline: none;
+        }
+
+        .flag-button.active {
+            opacity: 1;
+        }
+
+        .flag-button:active {
+            transform: scale(1);
+        }
+
+        .flag-button svg {
+            width: 100%;
+            height: 100%;
+            display: block;
         }
     </style>
 </head>
@@ -308,10 +339,26 @@
     </div>
 
     <!-- Language Selector -->
-    <select class="language-selector" id="languageSelector" onchange="changeLanguage(this.value)">
-        <option value="es">Español</option>
-        <option value="en">English</option>
-    </select>
+    <div class="language-flags">
+        <button class="flag-button" data-lang="es" onclick="changeLanguage('es')" title="Español">
+            <svg viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg">
+                <rect width="3" height="2" fill="#c60b1e"/>
+                <rect width="3" height="1.2" y="0.4" fill="#ffc400"/>
+            </svg>
+        </button>
+        <button class="flag-button" data-lang="en" onclick="changeLanguage('en')" title="English">
+            <svg viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg">
+                <rect width="60" height="30" fill="#012169"/>
+                <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/>
+                <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" stroke-width="4" clip-path="url(#clip)"/>
+                <clipPath id="clip">
+                    <rect width="60" height="30"/>
+                </clipPath>
+                <path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/>
+                <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/>
+            </svg>
+        </button>
+    </div>
 
     <!-- Footer -->
     <div class="footer">
@@ -367,14 +414,13 @@
         const timerDisplay = document.getElementById('timerDisplay');
         const buttonGroup = document.getElementById('buttonGroup');
         const restTimeInput = document.getElementById('restTime');
-        const languageSelector = document.getElementById('languageSelector');
 
         // Load from localStorage
         function loadSession() {
             const saved = localStorage.getItem('myoRepsSession');
             const savedLanguage = localStorage.getItem('myoRepsLanguage') || 'en';
             currentLanguage = savedLanguage;
-            languageSelector.value = currentLanguage;
+            updateLanguageButtons();
             
             if (saved) {
                 const data = JSON.parse(saved);
@@ -441,10 +487,23 @@
             }
         }
 
+        // Update language button states
+        function updateLanguageButtons() {
+            const buttons = document.querySelectorAll('.flag-button');
+            buttons.forEach(btn => {
+                if (btn.dataset.lang === currentLanguage) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
         // Change language
         function changeLanguage(lang) {
             currentLanguage = lang;
             localStorage.setItem('myoRepsLanguage', lang);
+            updateLanguageButtons();
             updateUI();
         }
 
