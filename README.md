@@ -31,28 +31,31 @@ This page helps you track your mini-series count and rest periods during your My
 1. Open `index.html` in any modern web browser
 2. Configure your rest time (default: 15 seconds)
 3. Start with the activation set (15 reps to failure)
-4. Press "Comenzar Descanso" (Start Rest) when ready
+4. Press "Start Rest" when ready
 5. Watch the countdown timer during your rest period
 6. Complete your mini-series (5 reps)
-7. Press "Siguiente Descanso" (Next Rest) to continue the cycle
-8. Use "Reiniciar" (Reset) to start a new session
+7. Press "Next Rest" to continue the cycle
+8. Use "Reset" to start a new session
 
 ## Features Breakdown
 
 ### Configuration Panel
-- **Descanso (seg)**: Set your rest duration in seconds
-- **Reiniciar**: Reset the session and mini-series counter
+
+- **Rest (sec)**: Set your rest duration in seconds
+- **Reset**: Reset the session and mini-series counter
 
 ### Main Display
+
 - Large prominent counter showing total mini-series completed
 - Current phase indicator (Activation, Rest, Mini-Series)
 - Visual countdown timer (only appears during rest)
 
 ### Controls
-- **Comenzar Descanso**: Start the rest period after activation set
-- **Pausar/Reanudar**: Pause and resume the timer during rest
-- **Siguiente Descanso**: Complete current mini-series and start rest
-- **Cancelar**: Cancel current rest and return to activation state
+
+- **Start Rest**: Start the rest period after activation set
+- **Pause/Resume**: Pause and resume the timer during rest
+- **Next Rest**: Complete current mini-series and start rest
+- **Cancel**: Cancel current rest and return to activation state
 
 ## Design Philosophy
 
@@ -73,6 +76,7 @@ This page helps you track your mini-series count and rest periods during your My
 ## Browser Compatibility
 
 Works in all modern browsers:
+
 - Chrome/Edge 90+
 - Firefox 88+
 - Safari 14+
