@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -23,8 +23,67 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+        }
+
+        /* === TAB BAR — M3 Secondary Tabs === */
+        .tab-bar {
+            display: flex;
+            min-height: 48px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            flex-shrink: 0;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.60);
+            border: none;
+            padding: 14px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+            min-width: unset;
+            position: relative;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.60);
+            transform: none;
+        }
+
+        .tab-btn:active {
+            background: rgba(255, 255, 255, 0.12);
+            transform: none;
+        }
+
+        .tab-btn.active {
+            color: #ffffff;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #3b82f6;
+            border-radius: 3px 3px 0 0;
+        }
+
+        /* === TAB CONTENT === */
+        .tab-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
             padding: 12px;
             gap: 16px;
+            min-height: 0;
+            overflow-y: auto;
         }
 
         /* === CONFIGURATION PANEL === */
@@ -40,6 +99,7 @@
             align-items: stretch;
             max-width: 300px;
             margin: 0 auto;
+            width: 100%;
         }
 
         .config-group {
@@ -114,12 +174,6 @@
             min-width: 120px;
         }
 
-        .sub-counter {
-            font-size: 16px;
-            color: rgba(255, 255, 255, 0.7);
-            font-weight: 500;
-        }
-
         /* === STATE DISPLAY === */
         .state-box {
             background: rgba(59, 130, 246, 0.1);
@@ -155,7 +209,7 @@
             color: #22c55e;
         }
 
-        /* === TIMER DISPLAY === */
+        /* === TIMER DISPLAY (myo-reps rest countdown) === */
         .timer-display {
             font-size: 56px;
             font-weight: 700;
@@ -170,16 +224,7 @@
             50% { transform: scale(1.05); }
         }
 
-        /* === BUTTONS === */
-        .button-group {
-            display: flex;
-            gap: 12px;
-            width: 100%;
-            max-width: 280px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
+        /* === BUTTONS (base) === */
         button {
             background: rgba(255, 255, 255, 0.1);
             color: #fff;
@@ -206,6 +251,15 @@
             transform: translateY(0);
         }
 
+        .button-group {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            max-width: 280px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
         button.primary {
             background: #3b82f6;
             border-color: #3b82f6;
@@ -219,7 +273,6 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            cursor: pointer;
         }
 
         button.primary:hover {
@@ -250,7 +303,11 @@
             border-color: rgba(239, 68, 68, 0.7);
         }
 
-        /* === HIDDEN STATES === */
+        button.reset {
+            width: 100%;
+        }
+
+        /* === HIDDEN === */
         .hidden {
             display: none !important;
         }
@@ -260,28 +317,20 @@
             text-align: center;
             font-size: 12px;
             color: rgba(255, 255, 255, 0.4);
-            margin-top: auto;
-            padding-top: 16px;
+            padding: 6px 0 2px;
         }
 
-        button.reset {
-            width: 100%;
-        }
-
-        /* === LANGUAGE SELECTOR === */
         /* === LANGUAGE FLAGS === */
         .language-flags {
             display: flex;
             gap: 8px;
             justify-content: center;
-            margin-top: auto;
-            padding-top: 16px;
+            padding-top: 8px;
         }
 
         .flag-button {
             background: transparent;
             border: none;
-            outline: none;
             border-radius: 6px;
             width: 36px;
             height: 36px;
@@ -292,6 +341,10 @@
             cursor: pointer;
             transition: all 0.2s ease;
             opacity: 0.4;
+            min-width: unset;
+            flex: unset;
+            letter-spacing: 0;
+            text-transform: none;
         }
 
         .flag-button:hover {
@@ -299,88 +352,453 @@
             transform: scale(1.1);
         }
 
-        .flag-button:focus {
-            outline: none;
-        }
+        .flag-button:focus { outline: none; }
 
-        .flag-button.active {
-            opacity: 1;
-        }
+        .flag-button.active { opacity: 1; }
 
-        .flag-button:active {
-            transform: scale(1);
-        }
+        .flag-button:active { transform: scale(1); }
 
         .flag-button svg {
             width: 100%;
             height: 100%;
             display: block;
         }
+
+        /* ============================
+           TIMER TAB
+           ============================ */
+
+        .timer-tab {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .timer-tab .language-flags {
+            margin-top: auto;
+        }
+
+        /* --- Preset section (top) --- */
+        .timer-preset-section-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .timer-presets-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .timer-preset-btn {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+            padding: 16px 8px;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            min-width: unset;
+            flex: unset;
+            letter-spacing: 0;
+            text-transform: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .timer-preset-btn:hover {
+            background: rgba(59, 130, 246, 0.28);
+            border-color: rgba(59, 130, 246, 0.55);
+            color: #bfdbfe;
+            transform: translateY(-2px);
+        }
+
+        .timer-preset-btn.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .timer-preset-add-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.4);
+            padding: 16px 8px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: 300;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            min-width: unset;
+            flex: unset;
+            letter-spacing: 0;
+            text-transform: none;
+        }
+
+        .timer-preset-add-btn:hover {
+            background: rgba(255, 255, 255, 0.09);
+            color: rgba(255, 255, 255, 0.65);
+            border-color: rgba(255, 255, 255, 0.35);
+            transform: none;
+        }
+
+        /* Inline add input row */
+        .timer-inline-input {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            grid-column: span 3;
+        }
+
+        .timer-inline-input input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 500;
+            text-align: center;
+            min-width: 0;
+        }
+
+        .timer-inline-input input:focus {
+            outline: none;
+            border-color: rgba(59, 130, 246, 0.7);
+        }
+
+        .timer-inline-input button {
+            padding: 12px 14px;
+            font-size: 14px;
+            min-width: unset;
+            flex: unset;
+            border-radius: 8px;
+        }
+
+        /* Edit modal */
+        .timer-edit-modal {
+            background: rgba(20, 20, 30, 0.97);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 14px;
+            grid-column: span 3;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .timer-edit-modal-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.45);
+        }
+
+        .timer-edit-modal-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .timer-edit-modal-row input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 500;
+            text-align: center;
+            min-width: 0;
+        }
+
+        .timer-edit-modal-row input:focus {
+            outline: none;
+            border-color: rgba(59, 130, 246, 0.7);
+        }
+
+        .timer-edit-modal-row button {
+            padding: 12px 14px;
+            font-size: 14px;
+            min-width: unset;
+            flex: unset;
+            border-radius: 8px;
+        }
+
+        .btn-delete-preset {
+            background: rgba(239, 68, 68, 0.18);
+            border: 1px solid rgba(239, 68, 68, 0.45);
+            color: #fca5a5;
+            font-size: 13px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            min-width: unset;
+            flex: unset;
+            width: 100%;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-delete-preset:hover {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: rgba(239, 68, 68, 0.65);
+            transform: none;
+        }
+
+        /* --- Countdown section (bottom) --- */
+        .timer-countdown-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            padding-bottom: 4px;
+        }
+
+        .timer-ring-container {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timer-ring {
+            width: 160px;
+            height: 160px;
+            transform: rotate(-90deg);
+        }
+
+        .timer-ring-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.07);
+            stroke-width: 10;
+        }
+
+        .timer-ring-progress {
+            fill: none;
+            stroke: #3b82f6;
+            stroke-width: 10;
+            stroke-linecap: round;
+            stroke-dasharray: 314.16;
+            stroke-dashoffset: 314.16;
+            transition: stroke-dashoffset 0.9s linear, stroke 0.4s ease;
+        }
+
+        .timer-ring-progress.warning { stroke: #f59e0b; }
+        .timer-ring-progress.danger  { stroke: #ef4444; }
+
+        .timer-ring-number {
+            position: absolute;
+            font-size: 38px;
+            font-weight: 700;
+            color: #fff;
+            text-align: center;
+            line-height: 1;
+            pointer-events: none;
+            letter-spacing: -1px;
+        }
+
+        .timer-ring-number.idle {
+            font-size: 26px;
+            color: rgba(255, 255, 255, 0.2);
+            letter-spacing: 0;
+        }
+
+        .timer-idle-text {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.3);
+            text-align: center;
+        }
+
+        /* Timer control buttons */
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .timer-btn-pause, .timer-btn-stop, .timer-btn-restart {
+            min-width: 76px;
+            flex: unset;
+            padding: 11px 14px;
+            font-size: 12px;
+            border-radius: 9px;
+            letter-spacing: 0.4px;
+        }
+
+        .timer-btn-pause {
+            background: rgba(59, 130, 246, 0.18);
+            border-color: rgba(59, 130, 246, 0.4);
+            color: #93c5fd;
+        }
+
+        .timer-btn-pause:hover {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: rgba(59, 130, 246, 0.6);
+        }
+
+        .timer-btn-stop {
+            background: rgba(239, 68, 68, 0.18);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+
+        .timer-btn-stop:hover {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: rgba(239, 68, 68, 0.6);
+        }
+
+        .timer-btn-restart {
+            background: rgba(245, 158, 11, 0.18);
+            border-color: rgba(245, 158, 11, 0.4);
+            color: #fcd34d;
+        }
+
+        .timer-btn-restart:hover {
+            background: rgba(245, 158, 11, 0.3);
+            border-color: rgba(245, 158, 11, 0.6);
+        }
     </style>
 </head>
 <body>
-    <!-- Configuration Panel -->
-    <div class="config-panel">
-        <div class="config-group">
-            <label for="restTime">Descanso (seg)</label>
-            <input type="text" id="restTime" value="15">
-        </div>
-        <button class="danger reset" onclick="resetSession()">Reiniciar</button>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="myo-reps" id="tabBtnMyoReps" onclick="switchTab('myo-reps')">Myo-Reps</button>
+        <button class="tab-btn" data-tab="timer" id="tabBtnTimer" onclick="switchTab('timer')">Timer</button>
     </div>
 
-    <!-- Main Container -->
-    <div class="container">
-        <!-- Series Counter -->
-        <div class="counter-section">
-            <div class="counter-label">Mini-series</div>
-            <div class="counter-display" id="counterDisplay">0</div>
+    <!-- ===== MYO-REPS TAB ===== -->
+    <div class="tab-content" data-tab="myo-reps" id="tabMyoReps">
+
+        <!-- Configuration Panel -->
+        <div class="config-panel">
+            <div class="config-group">
+                <label for="restTime">Descanso (seg)</label>
+                <input type="text" id="restTime" value="15">
+            </div>
+            <button class="danger reset" onclick="resetSession()">Reiniciar</button>
         </div>
 
-        <!-- State Box -->
-        <div class="state-box activation" id="stateBox">
-            Serie de activación
+        <!-- Main Container -->
+        <div class="container">
+            <div class="counter-section">
+                <div class="counter-label">Mini-series</div>
+                <div class="counter-display" id="counterDisplay">0</div>
+            </div>
+
+            <div class="state-box activation" id="stateBox">
+                Serie de activación
+            </div>
+
+            <div class="timer-display hidden" id="timerDisplay">15</div>
+
+            <div class="button-group" id="buttonGroup">
+                <button class="primary" onclick="startRest()">Comenzar Descanso</button>
+            </div>
         </div>
 
-        <!-- Timer Display (Hidden initially) -->
-        <div class="timer-display hidden" id="timerDisplay">15</div>
-
-        <!-- Button Group -->
-        <div class="button-group" id="buttonGroup">
-            <button class="primary" onclick="startRest()">Comenzar Descanso</button>
+        <!-- Language Selector -->
+        <div class="language-flags">
+            <button class="flag-button" data-lang="es" onclick="changeLanguage('es')" title="Español">
+                <svg viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="3" height="2" fill="#c60b1e"/>
+                    <rect width="3" height="1.2" y="0.4" fill="#ffc400"/>
+                </svg>
+            </button>
+            <button class="flag-button" data-lang="en" onclick="changeLanguage('en')" title="English">
+                <svg viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="60" height="30" fill="#012169"/>
+                    <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/>
+                    <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" stroke-width="4" clip-path="url(#clipMR)"/>
+                    <clipPath id="clipMR"><rect width="60" height="30"/></clipPath>
+                    <path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/>
+                    <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/>
+                </svg>
+            </button>
         </div>
+
+        <div class="footer">Myo Reps Gym Tracker</div>
     </div>
 
-    <!-- Language Selector -->
-    <div class="language-flags">
-        <button class="flag-button" data-lang="es" onclick="changeLanguage('es')" title="Español">
-            <svg viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg">
-                <rect width="3" height="2" fill="#c60b1e"/>
-                <rect width="3" height="1.2" y="0.4" fill="#ffc400"/>
-            </svg>
-        </button>
-        <button class="flag-button" data-lang="en" onclick="changeLanguage('en')" title="English">
-            <svg viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg">
-                <rect width="60" height="30" fill="#012169"/>
-                <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/>
-                <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" stroke-width="4" clip-path="url(#clip)"/>
-                <clipPath id="clip">
-                    <rect width="60" height="30"/>
-                </clipPath>
-                <path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/>
-                <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/>
-            </svg>
-        </button>
-    </div>
+    <!-- ===== TIMER TAB ===== -->
+    <div class="tab-content hidden" data-tab="timer" id="tabTimer">
+        <div class="timer-tab">
 
-    <!-- Footer -->
-    <div class="footer">
-        Myo Reps Gym Tracker
+            <!-- Preset Grid Section (top) -->
+            <div>
+                <div class="timer-preset-section-label" id="timerPresetsLabel">Presets</div>
+                <div class="timer-presets-grid" id="timerPresetsGrid">
+                    <!-- rendered by renderTimerPresets() -->
+                </div>
+            </div>
+
+            <!-- Countdown Section (bottom) -->
+            <div class="timer-countdown-section">
+                <!-- SVG circular progress ring -->
+                <div class="timer-ring-container">
+                    <svg class="timer-ring" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                        <circle class="timer-ring-bg" cx="60" cy="60" r="50"/>
+                        <circle class="timer-ring-progress" id="timerRingProgress" cx="60" cy="60" r="50"/>
+                    </svg>
+                    <div class="timer-ring-number idle" id="timerRingNumber">--</div>
+                </div>
+
+                <!-- Idle text (shown when no timer active) -->
+                <div class="timer-idle-text" id="timerIdleText">Toca un preset para iniciar</div>
+
+                <!-- Controls (hidden when idle) -->
+                <div class="timer-controls hidden" id="timerControls">
+                    <button class="timer-btn-pause" id="timerBtnPause" onclick="timerPauseResume()">Pausar</button>
+                    <button class="timer-btn-stop" id="timerBtnStop" onclick="timerStop()">Stop</button>
+                    <button class="timer-btn-restart" id="timerBtnRestart" onclick="timerRestart()">Reiniciar</button>
+                </div>
+            </div>
+
+            <!-- Language Selector -->
+            <div class="language-flags">
+                <button class="flag-button" data-lang="es" onclick="changeLanguage('es')" title="Español">
+                    <svg viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="3" height="2" fill="#c60b1e"/>
+                        <rect width="3" height="1.2" y="0.4" fill="#ffc400"/>
+                    </svg>
+                </button>
+                <button class="flag-button" data-lang="en" onclick="changeLanguage('en')" title="English">
+                    <svg viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="60" height="30" fill="#012169"/>
+                        <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/>
+                        <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" stroke-width="4" clip-path="url(#clipT)"/>
+                        <clipPath id="clipT"><rect width="60" height="30"/></clipPath>
+                        <path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/>
+                        <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="footer">Myo Reps Gym Tracker</div>
+        </div>
     </div>
 
     <script>
-        // Translations
+        // ================================================
+        // TRANSLATIONS
+        // ================================================
         const translations = {
             es: {
+                // Myo-Reps
                 restLabel: 'Descanso (seg)',
                 resetButton: 'Reiniciar',
                 miniSeriesLabel: 'Mini-series',
@@ -393,9 +811,28 @@
                 cancelButton: 'Cancelar',
                 nextRestButton: 'Iniciar Descanso',
                 resetConfirm: '¿Reiniciar la sesión? Se perderán todos los datos.',
-                footerText: 'Myo Reps Gym Tracker'
+                footerText: 'Myo Reps Gym Tracker',
+                // Tabs
+                tabMyoReps: 'Myo-Reps',
+                tabTimer: 'Timer',
+                // Timer
+                timerPresetsLabel: 'Presets',
+                timerIdleText: 'Toca un preset para iniciar',
+                timerPauseButton: 'Pausar',
+                timerResumeButton: 'Reanudar',
+                timerStopButton: 'Stop',
+                timerRestartButton: 'Reiniciar',
+                timerAddPlaceholder: 'Segundos',
+                timerConfirmAdd: '✓',
+                timerCancelAdd: '✕',
+                timerEditTitle: 'Editar preset',
+                timerEditPlaceholder: 'Segundos',
+                timerConfirmEdit: '✓',
+                timerDeleteButton: 'Borrar',
+                timerCancelEdit: '✕',
             },
             en: {
+                // Myo-Reps
                 restLabel: 'Rest (sec)',
                 resetButton: 'Reset',
                 miniSeriesLabel: 'Mini-series',
@@ -408,12 +845,32 @@
                 cancelButton: 'Cancel',
                 nextRestButton: 'Start Rest',
                 resetConfirm: 'Reset session? All data will be lost.',
-                footerText: 'Myo Reps Gym Tracker'
+                footerText: 'Myo Reps Gym Tracker',
+                // Tabs
+                tabMyoReps: 'Myo-Reps',
+                tabTimer: 'Timer',
+                // Timer
+                timerPresetsLabel: 'Presets',
+                timerIdleText: 'Tap a preset to start',
+                timerPauseButton: 'Pause',
+                timerResumeButton: 'Resume',
+                timerStopButton: 'Stop',
+                timerRestartButton: 'Restart',
+                timerAddPlaceholder: 'Seconds',
+                timerConfirmAdd: '✓',
+                timerCancelAdd: '✕',
+                timerEditTitle: 'Edit preset',
+                timerEditPlaceholder: 'Seconds',
+                timerConfirmEdit: '✓',
+                timerDeleteButton: 'Delete',
+                timerCancelEdit: '✕',
             }
         };
 
-        // State management
-        let state = 'activation'; // activation, rest, mini-series
+        // ================================================
+        // MYO-REPS STATE
+        // ================================================
+        let state = 'activation';
         let miniSeriesCount = 0;
         let restTimeRemaining = 0;
         let timerInterval = null;
@@ -421,124 +878,135 @@
         let currentLanguage = 'en';
         let audioContext = null;
 
-        // DOM Elements
         const counterDisplay = document.getElementById('counterDisplay');
         const stateBox = document.getElementById('stateBox');
         const timerDisplay = document.getElementById('timerDisplay');
         const buttonGroup = document.getElementById('buttonGroup');
         const restTimeInput = document.getElementById('restTime');
 
-        // Load from localStorage
+        // ================================================
+        // TIMER TAB STATE
+        // ================================================
+        const TIMER_RING_CIRCUMFERENCE = 314.16; // 2 * PI * 50
+        const TIMER_MAX_PRESETS = 10;
+        const TIMER_DEFAULT_PRESETS = [30, 60, 90, 120, 150, 180];
+
+        let timerPresets = [];
+        let timerCountdownInterval = null;
+        let timerCountdownRemaining = 0;
+        let timerCountdownTotal = 0;
+        let timerIsPaused = false;
+        let timerEditIndex = null;
+        let longPressTimer = null;
+        const LONG_PRESS_DURATION = 500;
+
+        // Tab state
+        let activeTab = 'myo-reps';
+
+        // ================================================
+        // SESSION PERSISTENCE
+        // ================================================
         function loadSession() {
-            const saved = localStorage.getItem('myoRepsSession');
             const savedLanguage = localStorage.getItem('myoRepsLanguage') || 'en';
             currentLanguage = savedLanguage;
             updateLanguageButtons();
-            
+
+            const saved = localStorage.getItem('myoRepsSession');
             if (saved) {
                 const data = JSON.parse(saved);
                 restTimeInput.value = data.restTime || 15;
             }
+
+            // Load timer presets
+            const savedPresets = localStorage.getItem('myoRepsTimerPresets');
+            timerPresets = savedPresets ? JSON.parse(savedPresets) : [...TIMER_DEFAULT_PRESETS];
+
+            // Load active tab
+            const savedTab = localStorage.getItem('myoRepsActiveTab') || 'myo-reps';
+            switchTab(savedTab, false);
+
             updateUI();
+            renderTimerPresets();
         }
 
-        // Save to localStorage
         function saveSession() {
             localStorage.setItem('myoRepsSession', JSON.stringify({
                 restTime: restTimeInput.value
             }));
         }
 
-        // Get translated text
-        function t(key) {
-            return translations[currentLanguage][key] || translations['es'][key];
+        function saveTimerPresets() {
+            localStorage.setItem('myoRepsTimerPresets', JSON.stringify(timerPresets));
         }
 
-        // Initialize audio context (singleton pattern)
+        // ================================================
+        // TRANSLATIONS
+        // ================================================
+        function t(key) {
+            return translations[currentLanguage][key] || translations['en'][key] || key;
+        }
+
+        // ================================================
+        // AUDIO
+        // ================================================
         function initAudioContext() {
             if (!audioContext) {
                 try {
                     audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                } catch (e) {
-                    return null;
-                }
+                } catch (e) { return null; }
             }
-            
-            // Resume if suspended (browser autoplay policy)
             if (audioContext && audioContext.state === 'suspended') {
                 audioContext.resume();
             }
-            
             return audioContext;
         }
 
-        // Play countdown beep (for seconds 3, 2, 1)
         function playCountdownBeep() {
             try {
                 const ctx = initAudioContext();
                 if (!ctx) return;
-                
                 const oscillator = ctx.createOscillator();
                 const gainNode = ctx.createGain();
-                
                 oscillator.connect(gainNode);
                 gainNode.connect(ctx.destination);
-                
-                oscillator.frequency.value = 900; // Hz
+                oscillator.frequency.value = 900;
                 oscillator.type = 'square';
-                
                 gainNode.gain.setValueAtTime(0.7, ctx.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
-                
                 oscillator.start(ctx.currentTime);
                 oscillator.stop(ctx.currentTime + 0.2);
-            } catch (e) {
-                // Silent fail if audio context not available
-            }
+            } catch (e) {}
         }
 
-        // Play finish beep (for second 0)
         function playFinishBeep() {
             try {
                 const ctx = initAudioContext();
                 if (!ctx) return;
-                
-                // Beep triple más audible
                 for (let i = 0; i < 3; i++) {
                     const oscillator = ctx.createOscillator();
                     const gainNode = ctx.createGain();
-                    
                     oscillator.connect(gainNode);
                     gainNode.connect(ctx.destination);
-                    
-                    oscillator.frequency.value = 1400; // Hz (frecuencia más alta)
-                    oscillator.type = 'square'; // Más penetrante
-                    
+                    oscillator.frequency.value = 1400;
+                    oscillator.type = 'square';
                     const startTime = ctx.currentTime + (i * 0.15);
                     gainNode.gain.setValueAtTime(0.8, startTime);
                     gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.12);
-                    
                     oscillator.start(startTime);
                     oscillator.stop(startTime + 0.12);
                 }
-            } catch (e) {
-                // Silent fail if audio context not available
-            }
+            } catch (e) {}
         }
 
-        // Update language button states
+        // ================================================
+        // LANGUAGE
+        // ================================================
         function updateLanguageButtons() {
-            const buttons = document.querySelectorAll('.flag-button');
-            buttons.forEach(btn => {
-                if (btn.dataset.lang === currentLanguage) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
+            document.querySelectorAll('.flag-button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === currentLanguage);
             });
         }
 
-        // Change language
         function changeLanguage(lang) {
             currentLanguage = lang;
             localStorage.setItem('myoRepsLanguage', lang);
@@ -546,14 +1014,411 @@
             updateUI();
         }
 
-        // Update UI with current language
+        // ================================================
+        // TAB NAVIGATION
+        // ================================================
+        function switchTab(tabName, persist = true) {
+            activeTab = tabName;
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.toggle('hidden', el.dataset.tab !== tabName);
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tabName);
+            });
+            if (persist) {
+                localStorage.setItem('myoRepsActiveTab', tabName);
+            }
+        }
+
+        // ================================================
+        // SWIPE GESTURE NAVIGATION
+        // ================================================
+        const TABS_ORDER = ['myo-reps', 'timer'];
+        let swipeStartX = 0;
+        let swipeStartY = 0;
+
+        document.body.addEventListener('pointerdown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+            swipeStartX = e.clientX;
+            swipeStartY = e.clientY;
+        });
+
+        document.body.addEventListener('pointerup', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+            const dx = e.clientX - swipeStartX;
+            const dy = e.clientY - swipeStartY;
+            const absDx = Math.abs(dx);
+            const absDy = Math.abs(dy);
+            if (absDx < 50) return;
+            if (absDy > 0 && absDx / absDy < 1.5) return;
+            const currentIndex = TABS_ORDER.indexOf(activeTab);
+            if (dx < 0 && currentIndex < TABS_ORDER.length - 1) {
+                switchTab(TABS_ORDER[currentIndex + 1]);
+            } else if (dx > 0 && currentIndex > 0) {
+                switchTab(TABS_ORDER[currentIndex - 1]);
+            }
+        });
+
+        // ================================================
+        // TIMER PRESETS – HELPERS
+        // ================================================
+        function formatSeconds(sec) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function isTimerActive() {
+            return timerCountdownInterval !== null || timerIsPaused;
+        }
+
+        // ================================================
+        // TIMER PRESETS – RENDER
+        // ================================================
+        function renderTimerPresets() {
+            const grid = document.getElementById('timerPresetsGrid');
+            grid.innerHTML = '';
+
+            const active = isTimerActive();
+            const sorted = [...timerPresets].sort((a, b) => a - b);
+
+            sorted.forEach((seconds) => {
+                const origIdx = timerPresets.indexOf(seconds);
+                const btn = document.createElement('button');
+                btn.className = 'timer-preset-btn' + (active ? ' disabled' : '');
+                btn.textContent = formatSeconds(seconds);
+                btn.dataset.idx = origIdx;
+
+                if (!active) {
+                    btn.addEventListener('click', () => {
+                        initAudioContext();
+                        startTimerCountdown(seconds);
+                    });
+
+                    // Long-press to edit
+                    btn.addEventListener('pointerdown', () => {
+                        longPressTimer = setTimeout(() => showTimerEditModal(origIdx), LONG_PRESS_DURATION);
+                    });
+                    btn.addEventListener('pointerup', () => clearTimeout(longPressTimer));
+                    btn.addEventListener('pointercancel', () => clearTimeout(longPressTimer));
+                    btn.addEventListener('pointerleave', () => clearTimeout(longPressTimer));
+                    btn.addEventListener('contextmenu', (e) => e.preventDefault());
+                }
+
+                grid.appendChild(btn);
+            });
+
+            // "+" button (only when not at limit and not during countdown)
+            if (timerPresets.length < TIMER_MAX_PRESETS && !active) {
+                const addBtn = document.createElement('button');
+                addBtn.className = 'timer-preset-add-btn';
+                addBtn.textContent = '+';
+                addBtn.onclick = showTimerAddInput;
+                grid.appendChild(addBtn);
+            }
+        }
+
+        // ================================================
+        // TIMER PRESETS – ADD
+        // ================================================
+        function showTimerAddInput() {
+            const grid = document.getElementById('timerPresetsGrid');
+            const existingAdd = grid.querySelector('.timer-preset-add-btn');
+            if (existingAdd) existingAdd.remove();
+
+            const row = document.createElement('div');
+            row.className = 'timer-inline-input';
+
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.min = '1';
+            input.placeholder = t('timerAddPlaceholder');
+            input.inputMode = 'numeric';
+
+            const confirmBtn = document.createElement('button');
+            confirmBtn.textContent = t('timerConfirmAdd');
+            confirmBtn.className = 'success';
+            confirmBtn.onclick = () => confirmAddPreset(input.value);
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = t('timerCancelAdd');
+            cancelBtn.className = 'danger';
+            cancelBtn.onclick = renderTimerPresets;
+
+            row.appendChild(input);
+            row.appendChild(confirmBtn);
+            row.appendChild(cancelBtn);
+            grid.appendChild(row);
+            input.focus();
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') confirmAddPreset(input.value);
+                if (e.key === 'Escape') renderTimerPresets();
+            });
+        }
+
+        function confirmAddPreset(value) {
+            const seconds = parseInt(value);
+            if (!seconds || seconds <= 0) return;
+            if (timerPresets.length >= TIMER_MAX_PRESETS) return;
+            timerPresets.push(seconds);
+            saveTimerPresets();
+            renderTimerPresets();
+        }
+
+        // ================================================
+        // TIMER PRESETS – EDIT / DELETE
+        // ================================================
+        function showTimerEditModal(idx) {
+            timerEditIndex = idx;
+            const grid = document.getElementById('timerPresetsGrid');
+            grid.innerHTML = '';
+
+            // Re-render preset buttons (non-interactive during edit)
+            const sorted = [...timerPresets].sort((a, b) => a - b);
+            sorted.forEach((seconds) => {
+                const origIdx = timerPresets.indexOf(seconds);
+                const btn = document.createElement('button');
+                btn.className = 'timer-preset-btn';
+                btn.textContent = formatSeconds(seconds);
+                if (origIdx === idx) {
+                    btn.style.borderColor = 'rgba(59,130,246,0.7)';
+                    btn.style.background = 'rgba(59,130,246,0.28)';
+                    btn.style.color = '#bfdbfe';
+                }
+                grid.appendChild(btn);
+            });
+
+            // "+" if under limit
+            if (timerPresets.length < TIMER_MAX_PRESETS) {
+                const addBtn = document.createElement('button');
+                addBtn.className = 'timer-preset-add-btn';
+                addBtn.textContent = '+';
+                addBtn.onclick = showTimerAddInput;
+                grid.appendChild(addBtn);
+            }
+
+            // Edit modal
+            const modal = document.createElement('div');
+            modal.className = 'timer-edit-modal';
+
+            const title = document.createElement('div');
+            title.className = 'timer-edit-modal-title';
+            title.textContent = t('timerEditTitle');
+
+            const row = document.createElement('div');
+            row.className = 'timer-edit-modal-row';
+
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.min = '1';
+            input.value = timerPresets[idx];
+            input.placeholder = t('timerEditPlaceholder');
+            input.inputMode = 'numeric';
+
+            const confirmBtn = document.createElement('button');
+            confirmBtn.textContent = t('timerConfirmEdit');
+            confirmBtn.className = 'success';
+            confirmBtn.onclick = () => confirmEditPreset(input.value);
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = t('timerCancelEdit');
+            cancelBtn.onclick = renderTimerPresets;
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = t('timerDeleteButton');
+            deleteBtn.className = 'btn-delete-preset';
+            deleteBtn.onclick = () => deletePreset(idx);
+
+            row.appendChild(input);
+            row.appendChild(confirmBtn);
+            row.appendChild(cancelBtn);
+            modal.appendChild(title);
+            modal.appendChild(row);
+            modal.appendChild(deleteBtn);
+            grid.appendChild(modal);
+
+            input.focus();
+            input.select();
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') confirmEditPreset(input.value);
+                if (e.key === 'Escape') renderTimerPresets();
+            });
+        }
+
+        function confirmEditPreset(value) {
+            const seconds = parseInt(value);
+            if (!seconds || seconds <= 0) return;
+            timerPresets[timerEditIndex] = seconds;
+            timerEditIndex = null;
+            saveTimerPresets();
+            renderTimerPresets();
+        }
+
+        function deletePreset(idx) {
+            timerPresets.splice(idx, 1);
+            timerEditIndex = null;
+            saveTimerPresets();
+            renderTimerPresets();
+        }
+
+        // ================================================
+        // TIMER COUNTDOWN
+        // ================================================
+        function startTimerCountdown(seconds) {
+            clearInterval(timerCountdownInterval);
+            timerCountdownTotal = seconds;
+            timerCountdownRemaining = seconds;
+            timerIsPaused = false;
+
+            // Show controls, hide idle text
+            document.getElementById('timerControls').classList.remove('hidden');
+            document.getElementById('timerIdleText').classList.add('hidden');
+            document.getElementById('timerBtnPause').textContent = t('timerPauseButton');
+
+            // Update display immediately (before first tick)
+            updateTimerDisplay(timerCountdownRemaining);
+            updateTimerProgress(timerCountdownRemaining, timerCountdownTotal);
+
+            timerCountdownInterval = setInterval(() => {
+                timerCountdownRemaining--;
+                updateTimerDisplay(timerCountdownRemaining);
+                updateTimerProgress(timerCountdownRemaining, timerCountdownTotal);
+
+                if (timerCountdownRemaining > 0 && timerCountdownRemaining <= 3) {
+                    playCountdownBeep();
+                }
+
+                if (timerCountdownRemaining <= 0) {
+                    clearInterval(timerCountdownInterval);
+                    timerCountdownInterval = null;
+                    playFinishBeep();
+                    timerReturnToIdle();
+                }
+            }, 1000);
+            // Disable presets — must be called after interval is assigned so isTimerActive() returns true
+            renderTimerPresets();
+        }
+
+        function updateTimerDisplay(remaining) {
+            const el = document.getElementById('timerRingNumber');
+            el.textContent = formatSeconds(remaining);
+            el.classList.remove('idle');
+
+            // Ring color: blue → amber → red
+            const ring = document.getElementById('timerRingProgress');
+            const ratio = timerCountdownTotal > 0 ? remaining / timerCountdownTotal : 1;
+            ring.classList.remove('warning', 'danger');
+            if (ratio <= 0.25) {
+                ring.classList.add('danger');
+            } else if (ratio <= 0.5) {
+                ring.classList.add('warning');
+            }
+        }
+
+        function updateTimerProgress(remaining, total) {
+            const ring = document.getElementById('timerRingProgress');
+            const offset = total > 0
+                ? TIMER_RING_CIRCUMFERENCE * (1 - remaining / total)
+                : TIMER_RING_CIRCUMFERENCE;
+            ring.style.strokeDashoffset = offset;
+        }
+
+        function timerReturnToIdle() {
+            clearInterval(timerCountdownInterval);
+            timerCountdownInterval = null;
+            timerIsPaused = false;
+
+            // Reset ring
+            const ring = document.getElementById('timerRingProgress');
+            ring.style.strokeDashoffset = TIMER_RING_CIRCUMFERENCE;
+            ring.classList.remove('warning', 'danger');
+
+            // Reset number
+            const numEl = document.getElementById('timerRingNumber');
+            numEl.textContent = '--';
+            numEl.classList.add('idle');
+
+            // Hide controls, show idle text
+            document.getElementById('timerControls').classList.add('hidden');
+            document.getElementById('timerIdleText').classList.remove('hidden');
+
+            // Re-enable presets
+            renderTimerPresets();
+        }
+
+        // ================================================
+        // TIMER CONTROLS
+        // ================================================
+        function timerPauseResume() {
+            if (timerIsPaused) {
+                // Resume
+                timerIsPaused = false;
+                document.getElementById('timerBtnPause').textContent = t('timerPauseButton');
+
+                timerCountdownInterval = setInterval(() => {
+                    timerCountdownRemaining--;
+                    updateTimerDisplay(timerCountdownRemaining);
+                    updateTimerProgress(timerCountdownRemaining, timerCountdownTotal);
+
+                    if (timerCountdownRemaining > 0 && timerCountdownRemaining <= 3) {
+                        playCountdownBeep();
+                    }
+
+                    if (timerCountdownRemaining <= 0) {
+                        clearInterval(timerCountdownInterval);
+                        timerCountdownInterval = null;
+                        playFinishBeep();
+                        timerReturnToIdle();
+                    }
+                }, 1000);
+            } else {
+                // Pause
+                timerIsPaused = true;
+                clearInterval(timerCountdownInterval);
+                timerCountdownInterval = null;
+                document.getElementById('timerBtnPause').textContent = t('timerResumeButton');
+            }
+        }
+
+        function timerStop() {
+            timerReturnToIdle();
+        }
+
+        function timerRestart() {
+            // Reset to full duration, keep running
+            clearInterval(timerCountdownInterval);
+            timerCountdownInterval = null;
+            timerIsPaused = false;
+            startTimerCountdown(timerCountdownTotal);
+        }
+
+        // ================================================
+        // UPDATE UI (i18n-aware refresh)
+        // ================================================
         function updateUI() {
-            document.querySelector('.config-group label').textContent = t('restLabel');
-            document.querySelector('.danger.reset').textContent = t('resetButton');
-            document.querySelector('.counter-label').textContent = t('miniSeriesLabel');
-            document.querySelector('.footer').textContent = t('footerText');
-            
-            // Update buttons based on current state
+            // Myo-Reps tab
+            document.querySelector('#tabMyoReps .config-group label').textContent = t('restLabel');
+            document.querySelector('#tabMyoReps .danger.reset').textContent = t('resetButton');
+            document.querySelector('#tabMyoReps .counter-label').textContent = t('miniSeriesLabel');
+            document.querySelector('#tabMyoReps .footer').textContent = t('footerText');
+
+            // Tab buttons
+            document.getElementById('tabBtnMyoReps').textContent = t('tabMyoReps');
+            document.getElementById('tabBtnTimer').textContent = t('tabTimer');
+
+            // Timer tab static text
+            document.getElementById('timerPresetsLabel').textContent = t('timerPresetsLabel');
+            document.getElementById('timerIdleText').textContent = t('timerIdleText');
+            document.querySelector('#tabTimer .footer').textContent = t('footerText');
+
+            // Timer control buttons
+            const pauseBtn = document.getElementById('timerBtnPause');
+            pauseBtn.textContent = timerIsPaused ? t('timerResumeButton') : t('timerPauseButton');
+            document.getElementById('timerBtnStop').textContent = t('timerStopButton');
+            document.getElementById('timerBtnRestart').textContent = t('timerRestartButton');
+
+            // Myo-Reps state-dependent buttons
             if (state === 'activation') {
                 buttonGroup.innerHTML = `<button class="primary" onclick="startRest()">${t('startRestButton')}</button>`;
                 stateBox.textContent = t('activationPhase');
@@ -566,38 +1431,33 @@
             }
         }
 
-        // Update display
+        // ================================================
+        // MYO-REPS LOGIC (unchanged)
+        // ================================================
         function updateDisplay() {
             counterDisplay.textContent = miniSeriesCount;
             saveSession();
         }
 
-        // Start rest period
         function startRest() {
-            // Initialize audio context on first user interaction
             initAudioContext();
-            
             totalRestTime = parseInt(restTimeInput.value) || 15;
             state = 'rest';
             restTimeRemaining = totalRestTime;
-            
+
             stateBox.className = 'state-box rest';
             stateBox.textContent = t('restingPhase');
             timerDisplay.classList.remove('hidden');
             timerDisplay.textContent = restTimeRemaining;
-            
             buttonGroup.innerHTML = `<button class="danger" onclick="pauseRest()">${t('pauseButton')}</button>`;
-            
+
             clearInterval(timerInterval);
             timerInterval = setInterval(() => {
                 restTimeRemaining--;
                 timerDisplay.textContent = restTimeRemaining;
-                
-                // Play sound for countdown (3, 2, 1)
                 if (restTimeRemaining > 0 && restTimeRemaining <= 3) {
                     playCountdownBeep();
                 }
-                
                 if (restTimeRemaining <= 0) {
                     clearInterval(timerInterval);
                     playFinishBeep();
@@ -606,7 +1466,6 @@
             }, 1000);
         }
 
-        // Pause rest
         function pauseRest() {
             clearInterval(timerInterval);
             buttonGroup.innerHTML = `
@@ -615,18 +1474,14 @@
             `;
         }
 
-        // Resume rest
         function resumeRest() {
             buttonGroup.innerHTML = `<button class="danger" onclick="pauseRest()">${t('pauseButton')}</button>`;
             timerInterval = setInterval(() => {
                 restTimeRemaining--;
                 timerDisplay.textContent = restTimeRemaining;
-                
-                // Play sound for countdown (3, 2, 1)
                 if (restTimeRemaining > 0 && restTimeRemaining <= 3) {
                     playCountdownBeep();
                 }
-                
                 if (restTimeRemaining <= 0) {
                     clearInterval(timerInterval);
                     playFinishBeep();
@@ -635,7 +1490,6 @@
             }, 1000);
         }
 
-        // Cancel rest
         function cancelRest() {
             clearInterval(timerInterval);
             state = 'activation';
@@ -645,43 +1499,36 @@
             buttonGroup.innerHTML = `<button class="primary" onclick="startRest()">${t('startRestButton')}</button>`;
         }
 
-        // Start mini-series
         function startMiniSeries() {
             state = 'mini-series';
-            
             stateBox.className = 'state-box mini-series';
             stateBox.textContent = t('miniSeriesPhase');
             timerDisplay.classList.add('hidden');
-            
-            buttonGroup.innerHTML = `
-                <button class="primary" onclick="nextRest()">${t('nextRestButton')}</button>
-            `;
+            buttonGroup.innerHTML = `<button class="primary" onclick="nextRest()">${t('nextRestButton')}</button>`;
         }
 
-        // Next rest (completes mini-series, starts new rest)
         function nextRest() {
             miniSeriesCount++;
             updateDisplay();
             startRest();
         }
 
-        // Reset session
         function resetSession() {
             if (confirm(t('resetConfirm'))) {
                 miniSeriesCount = 0;
                 state = 'activation';
                 clearInterval(timerInterval);
-                
                 timerDisplay.classList.add('hidden');
                 stateBox.className = 'state-box activation';
                 stateBox.textContent = t('activationPhase');
                 buttonGroup.innerHTML = `<button class="primary" onclick="startRest()">${t('startRestButton')}</button>`;
-                
                 updateDisplay();
             }
         }
 
-        // Initialize
+        // ================================================
+        // INIT
+        // ================================================
         loadSession();
     </script>
     <script>
