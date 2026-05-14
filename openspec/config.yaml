@@ -1,0 +1,25 @@
+schema: spec-driven
+
+context: |
+  Project: Myo Reps Gym Tracker
+  Tech stack: Pure HTML/CSS/JavaScript (single index.html), no build tools, no dependencies
+  Architecture: All logic in one file (index.html) with inline <style> and <script>
+  Persistence: localStorage
+  Offline: Service Worker (sw.js) with cache-first strategy
+  i18n: Bilingual (EN/ES) via translations object, all strings use t('key')
+  UI: Dark theme, mobile-first, portrait-optimized PWA
+  State machine: activation → rest → mini-series
+  Testing: Manual only
+  Conventions: See AGENTS.md
+
+rules:
+  specs:
+    - Use Given/When/Then format for scenarios
+    - Keep requirements simple — this is a single-file PWA
+  design:
+    - No external dependencies allowed
+    - All changes must stay within index.html
+    - Must maintain bilingual support (add keys to translations object)
+  tasks:
+    - Each task must be verifiable by opening index.html in browser
+    - Include sw.js cache bump as final task
