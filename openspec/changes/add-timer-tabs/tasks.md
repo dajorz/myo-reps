@@ -56,9 +56,10 @@
 ## 9. Finalization
 
 - [x] 9.1 Bump `CACHE_NAME` version in `sw.js`
-- [x] 9.2 Manual verification: open index.html, test tab switching, swipe, timer countdown with circular progress, pause/stop/restart, preset CRUD, preset limit (10 max), language toggle, and offline mode
+- [X] 9.2 Manual verification: open index.html, test tab switching, swipe, timer countdown with circular progress, pause/stop/restart, preset CRUD, preset limit (10 max), language toggle, and offline mode
 
 ## 10. Bug Fixes
 
 - [x] 10.1 Fix footer positioning in Timer tab: ensure footer stays pinned at the bottom of the viewport, matching Myo-Reps tab layout
 - [x] 10.2 Fix preset buttons not entering disabled/greyed state on first click when countdown starts — only on second click
+- [x] 10.3 Fix swipe gesture: replace pointer events with touch events and add touch-action: pan-y to body CSS
