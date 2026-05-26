@@ -1,7 +1,10 @@
 ---
 description: Implement tasks from an OpenSpec change (Experimental)
 model: Claude Sonnet 4.6 (copilot)
+<<<<<<< HEAD
 agent: agent
+=======
+>>>>>>> 1608cc110f711a0cbdca8e9279717b0e6c04b480
 ---
 
 Implement tasks from an OpenSpec change.
