@@ -1,5 +1,6 @@
 ---
 description: Implement tasks from an OpenSpec change (Experimental)
+model: Claude Sonnet 4.6 (copilot)
 ---
 
 Implement tasks from an OpenSpec change.
