@@ -1,4 +1,4 @@
-const CACHE_NAME = 'myo-reps-v7';
+const CACHE_NAME = 'myo-reps-v8';
 const PRECACHE_URLS = [
     '.',
     'index.html',

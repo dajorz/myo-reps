@@ -893,9 +893,13 @@
         const TIMER_DEFAULT_PRESETS = [30, 60, 90, 120, 150, 180];
 
         let timerPresets = [];
-        let timerCountdownInterval = null;
         let timerCountdownRemaining = 0;
         let timerCountdownTotal = 0;
+        let timerCountdownEndTime = 0;
+        let timerCountdownWorker = null;
+        let timerKeepaliveOscillator = null;
+        let timerKeepaliveGain = null;
+        let timerFinishBeepPlayed = false;
         let timerIsPaused = false;
         let timerEditIndex = null;
         let longPressTimer = null;
@@ -1071,7 +1075,7 @@
         }
 
         function isTimerActive() {
-            return timerCountdownInterval !== null || timerIsPaused;
+            return timerCountdownWorker !== null || timerIsPaused;
         }
 
         // ================================================
@@ -1267,11 +1271,77 @@
         // ================================================
         // TIMER COUNTDOWN
         // ================================================
+        function createTimerWorker() {
+            const blob = new Blob(['setInterval(()=>postMessage(0),250)'], { type: 'application/javascript' });
+            const url = URL.createObjectURL(blob);
+            const worker = new Worker(url);
+            URL.revokeObjectURL(url);
+            return worker;
+        }
+
+        function startTimerKeepalive() {
+            const ctx = initAudioContext();
+            if (!ctx) return;
+            try {
+                timerKeepaliveOscillator = ctx.createOscillator();
+                timerKeepaliveGain = ctx.createGain();
+                timerKeepaliveGain.gain.value = 0.0001;
+                timerKeepaliveOscillator.connect(timerKeepaliveGain);
+                timerKeepaliveGain.connect(ctx.destination);
+                timerKeepaliveOscillator.start();
+            } catch (e) {
+                timerKeepaliveOscillator = null;
+                timerKeepaliveGain = null;
+            }
+        }
+
+        function stopTimerKeepalive() {
+            try {
+                if (timerKeepaliveOscillator) {
+                    timerKeepaliveOscillator.stop();
+                    timerKeepaliveOscillator.disconnect();
+                }
+            } catch (e) {}
+            try {
+                if (timerKeepaliveGain) timerKeepaliveGain.disconnect();
+            } catch (e) {}
+            timerKeepaliveOscillator = null;
+            timerKeepaliveGain = null;
+        }
+
+        function onTimerTick() {
+            const remaining = Math.max(0, Math.ceil((timerCountdownEndTime - Date.now()) / 1000));
+            if (remaining !== timerCountdownRemaining) {
+                timerCountdownRemaining = remaining;
+                updateTimerDisplay(timerCountdownRemaining);
+                updateTimerProgress(timerCountdownRemaining, timerCountdownTotal);
+                if (timerCountdownRemaining > 0 && timerCountdownRemaining <= 3) {
+                    playCountdownBeep();
+                }
+            }
+            if (timerCountdownRemaining <= 0 && !timerFinishBeepPlayed) {
+                timerFinishBeepPlayed = true;
+                if (timerCountdownWorker) {
+                    timerCountdownWorker.terminate();
+                    timerCountdownWorker = null;
+                }
+                playFinishBeep();
+                timerReturnToIdle();
+            }
+        }
+
         function startTimerCountdown(seconds) {
-            clearInterval(timerCountdownInterval);
+            // Tear down any existing worker / keepalive before starting fresh
+            if (timerCountdownWorker) {
+                timerCountdownWorker.terminate();
+                timerCountdownWorker = null;
+            }
+            stopTimerKeepalive();
             timerCountdownTotal = seconds;
+            timerCountdownEndTime = Date.now() + seconds * 1000;
             timerCountdownRemaining = seconds;
             timerIsPaused = false;
+            timerFinishBeepPlayed = false;
 
             // Show controls, hide idle text
             document.getElementById('timerControls').classList.remove('hidden');
@@ -1282,23 +1352,10 @@
             updateTimerDisplay(timerCountdownRemaining);
             updateTimerProgress(timerCountdownRemaining, timerCountdownTotal);
 
-            timerCountdownInterval = setInterval(() => {
-                timerCountdownRemaining--;
-                updateTimerDisplay(timerCountdownRemaining);
-                updateTimerProgress(timerCountdownRemaining, timerCountdownTotal);
-
-                if (timerCountdownRemaining > 0 && timerCountdownRemaining <= 3) {
-                    playCountdownBeep();
-                }
-
-                if (timerCountdownRemaining <= 0) {
-                    clearInterval(timerCountdownInterval);
-                    timerCountdownInterval = null;
-                    playFinishBeep();
-                    timerReturnToIdle();
-                }
-            }, 1000);
-            // Disable presets — must be called after interval is assigned so isTimerActive() returns true
+            startTimerKeepalive();
+            timerCountdownWorker = createTimerWorker();
+            timerCountdownWorker.onmessage = onTimerTick;
+            // Disable presets — must be called after worker is assigned so isTimerActive() returns true
             renderTimerPresets();
         }
 
@@ -1327,8 +1384,13 @@
         }
 
         function timerReturnToIdle() {
-            clearInterval(timerCountdownInterval);
-            timerCountdownInterval = null;
+            if (timerCountdownWorker) {
+                timerCountdownWorker.terminate();
+                timerCountdownWorker = null;
+            }
+            stopTimerKeepalive();
+            timerCountdownEndTime = 0;
+            timerFinishBeepPlayed = false;
             timerIsPaused = false;
 
             // Reset ring
@@ -1357,28 +1419,19 @@
                 // Resume
                 timerIsPaused = false;
                 document.getElementById('timerBtnPause').textContent = t('timerPauseButton');
-
-                timerCountdownInterval = setInterval(() => {
-                    timerCountdownRemaining--;
-                    updateTimerDisplay(timerCountdownRemaining);
-                    updateTimerProgress(timerCountdownRemaining, timerCountdownTotal);
-
-                    if (timerCountdownRemaining > 0 && timerCountdownRemaining <= 3) {
-                        playCountdownBeep();
-                    }
-
-                    if (timerCountdownRemaining <= 0) {
-                        clearInterval(timerCountdownInterval);
-                        timerCountdownInterval = null;
-                        playFinishBeep();
-                        timerReturnToIdle();
-                    }
-                }, 1000);
+                timerCountdownEndTime = Date.now() + timerCountdownRemaining * 1000;
+                timerFinishBeepPlayed = false;
+                startTimerKeepalive();
+                timerCountdownWorker = createTimerWorker();
+                timerCountdownWorker.onmessage = onTimerTick;
             } else {
                 // Pause
                 timerIsPaused = true;
-                clearInterval(timerCountdownInterval);
-                timerCountdownInterval = null;
+                if (timerCountdownWorker) {
+                    timerCountdownWorker.terminate();
+                    timerCountdownWorker = null;
+                }
+                stopTimerKeepalive();
                 document.getElementById('timerBtnPause').textContent = t('timerResumeButton');
             }
         }
@@ -1389,8 +1442,6 @@
 
         function timerRestart() {
             // Reset to full duration, keep running
-            clearInterval(timerCountdownInterval);
-            timerCountdownInterval = null;
             timerIsPaused = false;
             startTimerCountdown(timerCountdownTotal);
         }
@@ -1531,6 +1582,19 @@
         // ================================================
         // INIT
         // ================================================
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && timerCountdownEndTime > 0 && !timerIsPaused) {
+                const remaining = Math.max(0, Math.ceil((timerCountdownEndTime - Date.now()) / 1000));
+                timerCountdownRemaining = remaining;
+                updateTimerDisplay(timerCountdownRemaining);
+                updateTimerProgress(timerCountdownRemaining, timerCountdownTotal);
+                if (remaining <= 0 && !timerFinishBeepPlayed) {
+                    timerFinishBeepPlayed = true;
+                    playFinishBeep();
+                    timerReturnToIdle();
+                }
+            }
+        });
         loadSession();
     </script>
     <script>
