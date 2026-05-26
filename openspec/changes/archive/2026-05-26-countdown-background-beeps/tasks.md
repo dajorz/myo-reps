@@ -33,14 +33,14 @@
 
 ## 6. Manual verification on Android Chrome
 
-- [ ] 6.1 Open `index.html` (installed PWA) on Android, start a 30 s timer, switch to another app immediately, and confirm the 3-2-1 beeps and finish beep play at approximately the right time.
-- [ ] 6.2 Repeat with a 60 s timer, switching away halfway through; return to the tab and confirm remaining time matches wall-clock (within ±1 s).
-- [ ] 6.3 Test Pause / Resume / Stop / Restart while in the foreground — behaviour unchanged from before.
-- [ ] 6.4 Pause a timer, switch apps for 30 s, return, and confirm the timer is still paused at the same remaining value.
-- [ ] 6.5 Confirm no audible artefact from the keepalive oscillator (no clicks/hiss) on device speaker and on Bluetooth headphones.
-- [ ] 6.6 Confirm Myo-Reps rest timer still works exactly as before (no regression on the unchanged path).
+- [x] 6.1 Open `index.html` (installed PWA) on Android, start a 30 s timer, switch to another app immediately, and confirm the 3-2-1 beeps and finish beep play at approximately the right time.
+- [x] 6.2 Repeat with a 60 s timer, switching away halfway through; return to the tab and confirm remaining time matches wall-clock (within ±1 s).
+- [x] 6.3 Test Pause / Resume / Stop / Restart while in the foreground — behaviour unchanged from before.
+- [x] 6.4 Pause a timer, switch apps for 30 s, return, and confirm the timer is still paused at the same remaining value.
+- [x] 6.5 Confirm no audible artefact from the keepalive oscillator (no clicks/hiss) on device speaker and on Bluetooth headphones.
+- [x] 6.6 Confirm Myo-Reps rest timer still works exactly as before (no regression on the unchanged path).
 
 ## 7. Service worker cache
 
 - [x] 7.1 Bump `CACHE_NAME` in `sw.js` (e.g., increment patch version).
-- [ ] 7.2 Reload the PWA twice on device to confirm the new `index.html` is picked up by the service worker.
+- [x] 7.2 Reload the PWA twice on device to confirm the new `index.html` is picked up by the service worker.
